@@ -1,0 +1,206 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/index/index",
+			"style": {
+				// "navigationBarTitleText": "首页",
+				"navigationBarTitleText": "招聘",
+				"app-plus": {
+					"titleNView": false, //禁用原生导航栏
+					"softinputNavBar": "none"
+				}
+			}
+		},
+		// {
+		// 	"path": "pages/index/recruit",
+		// 	"style": {
+		// 		"navigationBarTitleText": "招聘"
+		// 		// "navigationBarBackgroundColor": "#ec706b",
+		// 		// "backgroundColor": "#f8f8f8",
+		// 		// "app-plus": {
+		// 		// 	"navigationBarTextStyle": "white",
+		// 		// 	"bounce": "none"
+		// 		// }
+		// 	}
+		// },
+		// {
+		// 	"path": "pages/index/train",
+		// 	"style": {
+		// 		"navigationBarTitleText": "培训"
+		// 		// "navigationBarBackgroundColor": "#ec706b",
+		// 		// "backgroundColor": "#f8f8f8",
+		// 		// "app-plus": {
+		// 		// 	"navigationBarTextStyle": "white",
+		// 		// 	"bounce": "none"
+		// 		// }
+		// 	}
+		// },
+		// {
+		// 	"path": "pages/index/practice",
+		// 	"style": {
+		// 		"navigationBarTitleText": "实践"
+		// 		// "navigationBarBackgroundColor": "#ec706b",
+		// 		// "backgroundColor": "#f8f8f8",
+		// 		// "app-plus": {
+		// 		// 	"navigationBarTextStyle": "white",
+		// 		// 	"bounce": "none"
+		// 		// }
+		// 	}
+		// },
+		// {
+		// 	"path": "pages/index/freeWork",
+		// 	"style": {
+		// 		"navigationBarTitleText": "自由工作"
+		// 		// "navigationBarBackgroundColor": "#ec706b",
+		// 		// "backgroundColor": "#f8f8f8",
+		// 		// "app-plus": {
+		// 		// 	"navigationBarTextStyle": "white",
+		// 		// 	"bounce": "none"
+		// 		// }
+		// 	}
+		// },
+		{
+			"path": "pages/index/common",
+			"style": {
+				"navigationBarTitleText": "我的"
+				// "navigationBarBackgroundColor": "#ec706b",
+				// "backgroundColor": "#f8f8f8",
+				// "app-plus": {
+				// 	"navigationBarTextStyle": "white",
+				// 	"bounce": "none"
+				// }
+			}
+		},
+		{
+			"path": "pages/index/home",
+			"style": {
+				"navigationBarTitleText": "视频"
+				// "navigationBarBackgroundColor": "#ec706b",
+				// "backgroundColor": "#f8f8f8",
+				// "app-plus": {
+				// 	"titleNView": false,
+				// 	"navigationBarTextStyle": "white",
+				// 	"bounce": "none"
+				// }
+			}
+		},
+		{
+			"path": "pages/user/login",
+			"style": {
+				"navigationBarTitleText": "登录"
+			}
+		},
+		{
+			"path": "pages/user/register",
+			"style": {
+				"navigationBarTitleText": "注册"
+			}
+		},
+		{
+			"path": "pages/user/bindPhone",
+			"style": {
+				"navigationBarTitleText": "绑定手机号"
+			}
+		},
+		{
+			"path": "pages/user/forget",
+			"style": {
+				"navigationBarTitleText": "忘记密码"
+			}
+		},
+		{
+			"path": "pages/user/protocol",
+			"style": {
+				"navigationBarTitleText": "协议"
+			}
+		},
+		{
+			"path": "pages/template/editInfo",
+			"style": {
+				"navigationBarTitleText": "个人信息"
+			}
+		},
+		{
+			"path": "pages/details/details",
+			"style": {
+				"navigationBarTitleText": "详情",
+				"navigationBarBackgroundColor": "#ec706b",
+				"backgroundColor": "#f8f8f8",
+				"app-plus": {
+					"navigationBarTextStyle": "white",
+					"bounce": "none"
+				}
+			}
+		},
+		{
+			"path": "pages/details/videoDetails",
+			"style": {
+				"navigationBarTitleText": "",
+				"navigationBarBackgroundColor": "#ec706b",
+				"backgroundColor": "#f8f8f8",
+				"app-plus": {
+					"titleNView": false,
+					"navigationBarTextStyle": "white",
+					"bounce": "none"
+				}
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#ec706b",
+		"backgroundColor": "#ec706b"
+	},
+	"tabBar": {
+		"color": "#444444",
+		"selectedColor": "#444444",
+		"borderStyle": "black",
+		"backgroundColor": "#ffffff",
+		"list": [  { 
+						"pagePath": "pages/index/index",
+						"text": "招聘",
+						"iconPath": "static/icon_home.png",
+						"selectedIconPath": "static/icon_home_c.png"
+					},
+					// {
+					// 	"pagePath": "pages/index/recruit",
+					// 	"text": "招聘",
+					// 	"iconPath": "static/icon_home.png",
+					// 	"selectedIconPath": "static/icon_home_c.png"
+					// },
+					// {
+					// 	"pagePath": "pages/index/train",
+					// 	"text": "培训",
+					// 	"iconPath": "static/icon_home.png",
+					// 	"selectedIconPath": "static/icon_home_c.png"
+					// },
+					// {
+					// 	"pagePath": "pages/index/practice",
+					// 	"text": "实践",
+					// 	"iconPath": "static/icon_home.png",
+					// 	"selectedIconPath": "static/icon_home_c.png"
+					// },
+					// {
+					// 	"pagePath": "pages/index/freeWork",
+					// 	"text": "自由工作",
+					// 	"iconPath": "static/icon_home.png",
+					// 	"selectedIconPath": "static/icon_home_c.png"
+					// }
+								
+					
+					{
+						"pagePath": "pages/index/home",
+						"text": "视频",
+						"iconPath": "static/icon_xiaoxi.png",
+						"selectedIconPath": "static/icon_xiaoxi_c.png"
+					}, 
+					{
+						"pagePath": "pages/index/common",
+						"text": "我的",
+						"iconPath": "static/icon_wode.png",
+						"selectedIconPath": "static/icon_wode_c.png"
+					}
+				]
+	}
+}
