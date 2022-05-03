@@ -1,13 +1,10 @@
 <template>
 	<view class="register_page">
-		<z-nav-bar></z-nav-bar>
-		<!-- 公共组件-每个页面必须引入 -->
-		<public-module></public-module>
 		<view class="title">
 			<text :class="{active:type == 2000}" @click="type = 2000">密码登录</text>
 			<text :class="{active:type == 1000}" @click="type = 1000">验证码登录</text>
 		</view>
-		<view class="input_box"><input type="text" v-model="email" placeholder="请输入您的邮箱" /></view>
+		<view class="input_box"><input type="text" v-model="email" placeholder="请输入您的用户名" /></view>
 		<view class="input_box" v-if="type == 1000">
 			<input type="number" v-model="code" placeholder="请输入邮箱验证码" maxlength="6" @confirm="onSubmit" />
 			<button class="active" @click="onSetCode">{{ codeText }}</button>
@@ -100,7 +97,7 @@ export default {
 				});
 				return;
 			}
-			if (!this.$base.mailRegular.test(this.email)) {
+			if (!this.base.mailRegular.test(this.email)) {
 				uni.showToast({
 					title: '邮箱格式不正确',
 					icon: 'none'
@@ -133,7 +130,6 @@ export default {
 			// 	return;
 			// }
 			let httpData = {
-				// email: this.email,
 				username: this.email
 			};
 			if (this.type == 1000) {
@@ -157,11 +153,9 @@ export default {
 				httpData.password = this.password;
 			}
 			// this.http.post('api/common/v1/login', httpData).then(res => {
-			this.http.post('http://127.0.0.1:8083/sys/login', httpData).then(res => {
-				console.log(res)
-				this.setUserInfo(res.data);
-				this.token = res.resolve.data.token;
-				console.log(this.token)
+			this.http.post('/sys/login', httpData).then(res => {
+				console.log(res.response)
+				this.setUserInfo(res.response.data);
 				socket.init();
 				uni.showToast({
 					title: '登录成功',

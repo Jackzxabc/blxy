@@ -1,32 +1,31 @@
 <template>
 	<view class="tabs">
-		<home :videoUrl="videoUrlInfo" v-show="false"/>
-		<view class="page-header">
+		<view :style="{paddingTop: statusBarHeight + 'px'}" class="page-header">
 			<view class="page-header-wrapper">
 				<view class="page-header-left">
-					<!-- <text class="icon" style="color:#FFFFFF;font-size: 50rpx;">&#xeb94;</text> -->
 					<uni-icons type="scan" color="#fafafa" size="25" />
 				</view>
-				<view class="page-header-center"><text @click="toUrl('/pages/search/search')" class="search-input">输入关键字搜索</text></view>
-				<view class="page-header-right" @click="toUrl('/pages/list/create')">
-					<!-- <text class="icon" style="color:#FFFFFF;font-size: 50rpx;">&#xebd1;</text> -->
+				<view @click="toUrl('/pages/search/search')" class="page-header-center">
+					<text class="search-input">输入关键字搜索</text>
+				</view>
+				<view class="page-header-right" @click="toUrl('/pages/index/home', true)">
 					<uni-icons type="camera" color="#fafafa" size="25" />
 					<text class="contribute-text">发布</text>
 				</view>
 			</view>
 		</view>
-		<scroll-view id="tab-bar" class="scroll-h" :scroll-x="true" :show-scrollbar="false" :scroll-into-view="scrollInto">
+		<scroll-view id="tab-bar" class="scroll-h" :scroll-x="true" :show-scrollbar="false" scroll-with-animation :scroll-into-view="scrollInto">
 			<view v-for="(tab, index) in tabBars" :key="tab.id" class="uni-tab-item" :id="tab.id" :data-current="index" @click="ontabtap">
 				<text class="uni-tab-item-title" :class="isScroll(index) ? 'uni-tab-item-title-active' : ''">{{ tab.name }}</text>
 				<!-- 下划线 -->
-				<view style="width:100%" :class="isScroll(index) ? 'underlinebox' : 'underlinebox-active'"><view class="underline"></view></view>
+				<view style="width: 100%;" class="underlinebox" :class="isScroll(index) ? 'underlinebox-active' : ''"></view>
 			</view>
 		</scroll-view>
 		<view class="line-h"></view>
 		<swiper :current="tabIndex" class="swiper-box" style="flex: 1;" :duration="300" @change="ontabchange">
-			<swiper-item class="swiper-item" v-for="(tab, index1) in newsList" :key="index1">
+			<swiper-item class="swiper-item" v-for="(tab, index1) in newsList" :key="tab.id">
 				<!-- #ifdef APP-NVUE -->
-				<list class="scroll-v list" enableBackToTop="true" scroll-y loadmoreoffset="15" @loadmore="loadMore(index1)">
+				<waterfall style="padding-top: 16rpx;" column-count="2" column-width="auto" left-gap="8" right-gap="8" column-gap="8">
 					<refresh class="refresh" @refresh="onrefresh(index1)" @pullingdown="onpullingdown" :display="tab.refreshing ? 'show' : 'hide'">
 						<div class="refresh-view">
 							<image
@@ -39,343 +38,302 @@
 							<text class="loading-text">{{ tab.refreshText }}</text>
 						</div>
 					</refresh>
-					<cell v-for="(newsitem, index2) in tab.data" :key="newsitem.id">
-						<media-item :options="newsitem" @close="close(index1, index2)" @click="goDetail(newsitem, index2)"></media-item>
+					<cell v-for="(item, idx) in tab.data" :key="idx">
+						<view class="list-box" @tap="goDetail(item, idx)">
+						    <view class="list-video-wrap">
+								<image
+									:style="{width: item.width + 'px', height: item.height + 'px'}"
+									:src="item.path + '?x-oss-process=video/snapshot,t_0,f_jpg'"
+								/>
+							</view>
+						    <view class="note-view">
+								<text class="note-title">{{item.videoDesc}}</text>
+						    </view>
+						</view>	
 					</cell>
-					<cell class="loading-more" v-if="tab.isLoading || tab.data.length > 4">
-						<text class="loading-more-text">{{ tab.loadingText }}</text>
-					</cell>
-				</list>
+					<header class="footer" v-if="tab.isLoading" ref="footer"  @appear="loadMore">
+					    <view class="loading-more">
+					      	<text class="loading-more-text">{{tab.loadingText}}</text>
+					    </view>
+					</header>
+				</waterfall>
 				<!-- #endif -->
 				<!-- #ifndef APP-NVUE -->
-				<scroll-view class="scroll-v list" enableBackToTop="true" scroll-y @scrolltolower="loadMore(index1)">
-					<view v-for="(newsitem, index2) in tab.data" :key="newsitem.id">
-						<media-item :options="newsitem" @close="close(index1, index2)" @click="goDetail(newsitem)"></media-item>
+				<scroll-view class="scroll-v list" enableBackToTop="true" scroll-y @scrolltolower="loadMore">
+					<view class="main-wrap">
+						<view class="left-wrap">
+							<block v-for="(item, idx) in tab.data" :key="idx">
+								<view class="list-box" @tap="goDetail(item, idx)" v-if="idx % 2 == 0">
+								    <view class="list-video-wrap">
+										<image
+											:style="{width: item.width + 'px', height: item.height + 'px'}"
+											:src="item.path + '?x-oss-process=video/snapshot,t_0,f_jpg'"
+										/>
+									</view>
+								    <view class="note-view">
+										<text class="note-title">{{item.videoDesc}}</text>
+								    </view>
+								</view>	
+							</block>
+						</view>
+						<view class="right-wrap">
+							<block v-for="(item, idx) in tab.data" :key="idx">
+								<view class="list-box" @tap="goDetail(item, idx)" v-if="idx % 2 == 1">
+								    <view class="list-video-wrap">
+										<image
+											:style="{width: item.width + 'px', height: item.height + 'px'}"
+											:src="item.path + '?x-oss-process=video/snapshot,t_0,f_jpg'"
+										/>
+									</view>
+								    <view class="note-view">
+										<text class="note-title">{{item.videoDesc}}</text>
+								    </view>
+								</view>	
+							</block>
+						</view>
 					</view>
-					<view class="loading-more" v-if="tab.isLoading || tab.data.length > 4">
-						<text class="loading-more-text">{{ tab.loadingText }}</text>
+					<view class="loading-more" v-if="tab.isLoading">
+						<text class="loading-more-text">{{tab.loadingText}}</text>
 					</view>
 				</scroll-view>
 				<!-- #endif -->
 			</swiper-item>
 		</swiper>
+		<!-- 视频播放组件 -->
+		<video-player ref="videoPlayer" />
+		<z-popup v-model="showModal" type="center">
+			<view class="popup-wrapper">
+				<view class="popup-title">
+					<text class="popup-title-text">提示</text>
+				</view>
+				<view class="popup-content">
+					<text class="popup-content-text">{{modalContext}}</text>
+				</view>
+				<view class="popup-action" @tap="toLogin">
+					<text style="color: #ec706b;">去登录</text>
+				</view>
+			</view>
+		</z-popup>
 	</view>
 </template>
 <script>
 import mediaItem from './news-item.nvue';
 import uniIcons from '@/components/uni-icons/uni-icons.vue';
+import videoPlayer from '@/components/video-player/video-player.vue';
 import home from './home.vue';
-// 缓存每页最多
-const MAX_CACHE_DATA = 100;
-// 缓存页签数量
-const MAX_CACHE_PAGE = 3;
-
-const newsData = {
-	// data0: {
-	// 	datetime: '40分钟前',
-	// 	article_type: 0,
-	// 	title: '最新数学课程视频不断更新，欢迎大家集思广益!',
-	// 	source: 'Math',
-	// 	comment_count: 639,
-	// 	video_url: 'https://oss.console.aliyun.com/bucket/oss-cn-beijing/bolexueyuan/object?path=2022%2F03%2F',
-	// 	videoSrc: false
-	// }
-	// data0: {
-	// 	datetime: '40分钟前',
-	// 	article_type: 0,
-	// 	title: '最新数学课程视频不断更新，欢迎大家集思广益!',
-	// 	source: 'Math',
-	// 	comment_count: 639,
-	// 	videoSrc: true
-	// },
-	// data1: {
-	// 	datetime: '一天前',
-	// 	article_type: 1,
-	// 	title: '第一天数学视频已更新!',
-	// 	// image_url: 'https://img-cdn-qiniu.dcloud.net.cn/uniapp/images/shuijiao.jpg?imageView2/3/w/200/h/100/q/90',
-	// 	image_url: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2F5b0988e595225.cdn.sohucs.com%2Fimages%2F20190813%2Fb85bf1c853e140958a0a7b2c78f05b42.jpeg&refer=http%3A%2F%2F5b0988e595225.cdn.sohucs.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1644152264&t=72ee18b40431124c0b4bd491fb03695es',
-	// 	source: 'Math',
-	// 	comment_count: 11395,
-	// 	videoSrc: false
-	// },
-	// data2: {
-	// 	datetime: '一天前',
-	// 	article_type: 2,
-	// 	title: '数学视频持续更新中，欢迎大家持续关注!',
-	// 	// image_url: 'https://img-cdn-qiniu.dcloud.net.cn/uniapp/images/muwu.jpg?imageView2/3/w/200/h/100/q/90',
-	// 	image_url: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimgservice.suning.cn%2Fuimg1%2Fb2c%2Fimage%2Fo_6Rq1adFu7wFGivDo_-xA.jpg_800w_800h_4e&refer=http%3A%2F%2Fimgservice.suning.cn&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1644152265&t=db6771bb31f171d76bb01fa76898b604',
-	// 	source: 'Math',
-	// 	comment_count: 11395,
-	// 	videoSrc: true
-	// },
-	// data3: {
-	// 	article_type: 3,
-	// 	image_list: [
-	// 		{
-	// 			// url: 'https://img-cdn-qiniu.dcloud.net.cn/uniapp/images/cbd.jpg?imageView2/3/w/200/h/100/q/90',
-	// 			url: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fnet.thea.cn%2Fup%2Fpic%2F20149515758c2.jpg&refer=http%3A%2F%2Fnet.thea.cn&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1644152265&t=7f18c63132db4f9a4dedd36ab4a09bbc',
-	// 			width: 563,
-	// 			height: 316
-	// 		},
-	// 		{
-	// 			// url: 'https://img-cdn-qiniu.dcloud.net.cn/uniapp/images/muwu.jpg?imageView2/3/w/200/h/100/q/90',
-	// 			url: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fpic.vjshi.com%2F2018-04-03%2Fcb62732ddbc2d5537b8c6edf0db2192a%2F00003.jpg%3Fx-oss-process%3Dstyle%2Fwatermark&refer=http%3A%2F%2Fpic.vjshi.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1644152265&t=f1251ca24ff797cbfb6e802b6f94c131',
-	// 			width: 641,
-	// 			height: 360
-	// 		},
-	// 		{
-	// 			// url: 'https://img-cdn-qiniu.dcloud.net.cn/uniapp/images/shuijiao.jpg?imageView2/3/w/200/h/100/q/90',
-	// 			url: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fwww.jinmingwangxiao.com%2FWscms%2FUploads%2F2020-03-27%2F2020-03-27-15853012021221686204.png&refer=http%3A%2F%2Fwww.jinmingwangxiao.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1644152265&t=f084f57aaecddfb4ef3a63e09c0a698d',
-	// 			width: 640,
-	// 			height: 360
-	// 		}
-	// 	],
-	// 	datetime: '5分钟前',
-	// 	title: '清华数学名师张三老师已更新最新课程，欢迎大家持续学习，不断提升自己!',
-	// 	source: 'Math',
-	// 	comment_count: 11,
-	// 	videoSrc: false
-	// },
-	// data4: {
-	// 	datetime: '2小时前',
-	// 	article_type: 4,
-	// 	title: '北大数学名师李四老师已更新最新课程，欢迎大家持续学习，不断提升自己!',
-	// 	// image_url: 'https://img-cdn-qiniu.dcloud.net.cn/uniapp/images/cbd.jpg?imageView2/3/w/200/h/100/q/90',
-	// 	image_url: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fwww.gkxue8.com%2Fi%2F02062517786.jpg&refer=http%3A%2F%2Fwww.gkxue8.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1644152265&t=c477eb8836e6c53b6e363ba7c55143a7',
-	// 	source: 'Math',
-	// 	comment_count: 69,
-	// 	videoSrc: false
-	// }
-};
+import { mapState } from 'vuex';
+import baseUrl from '@/config/baseUrl.js'
 
 export default {
 	components: {
 		mediaItem,
 		uniIcons,
+		videoPlayer,
 		home
 	},
 	data() {
 		return {
-			videoUrlInfo: {},
+			showModal: false,
+			modalContext: '',
+			token: '',
+			statusBarHeight: 0,
 			newsList: [],
-			cacheTab: [],
+			page: 1,
 			tabIndex: 0,
-			lastIndex: 0, //上一次的坐标
+			scrollInto: '',
 			tabBars: [
 				{
-					name: '传媒',
-					id: 'guanzhu'
-				},
-				{
-					name: '技术',
+					name: '推荐',
 					id: 'tuijian'
 				},
 				{
-					name: '产品',
-					id: 'tiyu'
+					name: '学生',
+					id: 'xuesheng'
+				},
+				{
+					name: '自由职业',
+					id: 'ziyouzhiye'
+				},
+				{
+					name: '创业',
+					id: 'chuangye'
+				},
+				{
+					name: '技术',
+					id: 'jishu'
 				},
 				{
 					name: '设计',
-					id: 'redian'
+					id: 'sheji'
 				},
 				{
 					name: '运营',
-					id: 'caijing'
+					id: 'yunying'
 				},
 				{
-					name: '法学',
-					id: 'yule'
+					name: '产品',
+					id: 'chanpin'
 				},
-				{
-					name: '市场',
-					id: 'junshi'
-				},
-				{
-					name: '人事/财务/行政',
-					id: 'lishi'
-				},
-				{
-					name: '物理',
-					id: 'bendi'
-				},
-				{
-					name: '生物',
-					id: 'keji'
-				},
-				{
-					name: '美术',
-					id: 'tupian'
-				},
-				{
-					name: '体育',
-					id: 'yinpin'
-				},
-				// {
-				// 	name: '问答',
-				// 	id: 'wenda'
-				// },
-				// {
-				// 	name: '国际',
-				// 	id: 'guoji'
-				// },
-				// {
-				// 	name: '文化',
-				// 	id: 'wenhua'
-				// },
-				// {
-				// 	name: '读书',
-				// 	id: 'dushu'
-				// },
-				// {
-				// 	name: '游戏',
-				// 	id: 'youxi'
-				// },
-				// {
-				// 	name: '音乐',
-				// 	id: 'yinyue'
-				// },
-				// {
-				// 	name: '小说',
-				// 	id: 'xiaoshuo'
-				// },
-				{
-					name: '其他',
-					id: 'qita'
-				}
 			],
-			scrollInto: '',
-			showTips: false,
-			navigateFlag: false,
+			videoSrc: '',
 			pulling: false,
 			refreshIcon:
 				'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAB5QTFRFcHBw3Nzct7e39vb2ycnJioqK7e3tpqam29vb////D8oK7wAAAAp0Uk5T////////////ALLMLM8AAABxSURBVHja7JVBDoAgDASrjqj//7CJBi90iyYeOHTPMwmFZrHjYyyFYYUy1bwUZqtJIYVxhf1a6u0R7iUvWsCcrEtwJHp8MwMdvh2amHduiZD3rpWId9+BgPd7Cc2LIkPyqvlQvKxKBJ//Qwq/CacAAwDUv0a0YuKhzgAAAABJRU5ErkJggg=='
 		};
 	},
+	computed: {
+		...mapState(["userInfo"]),
+		listWidth () {
+			let systemInfo = uni.getSystemInfoSync();
+			// #ifdef APP-NVUE
+			return (systemInfo.screenWidth - 24) / 2;
+			// #endif
+			return uni.upx2px(350);
+		}
+	},
+	watch: {
+		userInfo(value) {
+			if(value.token) {
+				this.getVideoList(this.tabIndex);
+			}
+		}
+	},
 	onLoad() {
-		console.log("333333333333")
-		console.log(this.videoUrlInfo)
-		this.getVideoFiles();
-		this.getList(0);
-		// setTimeout(() => {
-		// 	this.tabBars.forEach(tabBar => {
-		// 		this.newsList.push({
-		// 			data: [],
-		// 			isLoading: false,
-		// 			refreshText: '',
-		// 			loadingText: '加载更多...'
-		// 		});
-		// 	});
-		// 	this.getList(0);
-		// }, 350);
+		this.tabBars.forEach((tabbar) => {
+			this.newsList.push({
+			    data: [],
+			    isLoading: true,
+			    refreshText: "",
+			    loadingText: '加载中...'
+			});
+		});
+		this.getVideoList(this.tabIndex);
+		let systemInfo = uni.getSystemInfoSync();
+		this.statusBarHeight = systemInfo.statusBarHeight;
+		
+		//监听发布视频
+		uni.$on('subscribe/video', (e) => {
+			let { id, name } = e.tag;
+			let index = this.tabBars.findIndex((item) => item.id === id);
+			this.tabIndex = index;
+			 this.getVideoList(index);
+		})
 	},
 	methods: {
 		isScroll(index) {
 			return this.tabIndex == index;
 		},
+		toUrl(url, tabbar) {
+			if(tabbar) {
+				uni.switchTab({ url })
+			}else {
+				uni.navigateTo({ url })
+			}
+		},
 		//获取文件列表数据
-		getVideoFiles() {
+		getVideoList(index) {
+			const type = this.tabBars[index].name;
 			uni.request({
-			    url: 'http://localhost:8083/video/listFile?token=8e0411a90254607472613fa788ebf4fd', //仅为示例，并非真实接口地址。
+				url: `${baseUrl.baseUrl}/video/getPathsByTag/${type}?token=${this.userInfo.token}`,
 				method: 'POST',
 			    success: (res) => {
-					console.log(res.data);
-					res.data.forEach(item => this.newsList.push(item));
-					console.log(this.newsList);
-			    }
-			});
-		},
-		//新闻详情
-		goDetail(item, index) {
-			let data = {
-				id: index,
-				title: item.title,
-				author: '详情',
-				time: item.datetime
-			};
-			let url = item.videoSrc ? 'videoDetails' : 'details';
-			uni.navigateTo({
-				url: `/pages/details/${url}?data=${JSON.stringify(data)}`
-			});
-		},
-		getList(index) {
-			// let activeTab = this.newsList[index];
-			let activeTab = this.newsList[index];
-			let list = [];
-			for (let i = 1; i <= 10; i++) {
-				let item = Object.assign({}, newsData['data' + Math.floor(Math.random() * 5)]);
-				item.id = this.newGuid();
-				list.push(item);
-			}
-			console.log(activeTab)
-			console.log(list)
-			activeTab.data = activeTab.data.concat(list);
-		},
-		close(index1, index2) {
-			uni.showModal({
-				content: '是否删除本条信息？',
-				success: res => {
-					if (res.confirm) {
-						this.newsList[index1].data.splice(index2, 1);
-					}
+					if(res.data.code == 401) {
+						this.showModal = true;
+						this.modalContext = res.data.msg;
+						return;
+					};
+					if(res.data.code == 500) {
+						uni.showToast({
+							title: res.data.msg,
+							icon:'none'
+						});
+						return;
+					};
+					if(res.data.length == 0) {
+						this.newsList[index].loadingText = '没有更多了'
+						this.newsList[index].isLoading = true;
+					}else {
+						this.newsList[index].isLoading = false;
+					};
+					this.getImageSize(index, res.data);
+			    },
+				complete: () => {
+					var tab = this.newsList[this.tabIndex];
+					this.pulling = true;
+					tab.refreshing = false;
+					tab.refreshFlag = false;
+					tab.refreshText = '已刷新';
+					setTimeout(() => {
+						// TODO fix ios和Android 动画时间相反问题
+						this.pulling = false;
+					}, 500);
 				}
 			});
 		},
-		loadMore(e) {
-			setTimeout(() => {
-				this.getList(this.tabIndex);
-			}, 500);
+		//获取图片大小并展示
+		async getImageSize(index, list) {
+			for(let i = 0; i < list.length; i++) {
+				let item = list[i];
+				const [err, imageInfo] = await uni.getImageInfo({
+					src: item.path + '?x-oss-process=video/snapshot,t_0,f_jpg',
+				});
+				item.height = imageInfo.height * this.listWidth / imageInfo.width;
+				item.width = this.listWidth;
+			};
+			if(this.page === 1) {
+				this.newsList[index].data = list;
+			}else{
+				this.newsList[index].data = this.newsList[index].data.concat(list);
+			}
+		},
+		toLogin(msg) {
+			uni.navigateTo({
+				url: '/pages/user/login',
+			});
+			this.showModal = false;
+		},
+		//新闻详情
+		goDetail(item, index) {
+			//当页预览视频
+			this.videoSrc = item.path;
+			this.$refs.videoPlayer.play({
+				url: item.path,
+				title: item.videoDesc
+			});
+			// 跳转到二级页播放
+			// let data = {
+			// 	id: index,
+			// 	title: item.videoDesc,
+			// 	path: item.path,
+			// 	author: '详情',
+			// 	time: item.datetime || ''
+			// };
+			// let url = item.path ? 'videoDetails' : 'details';
+			// uni.navigateTo({
+			// 	url: `/pages/details/${url}?data=${JSON.stringify(data)}`
+			// });
+		},
+		loadMore() {
+			console.log('触发下拉加载')
+			// this.newsList[this.tabIndex].isLoading = true;
+			// setTimeout(() => {
+			// 	this.newsList[this.tabIndex].isLoading = false;
+			// }, 500);
 		},
 		ontabtap(e) {
-			let index = e.target.dataset.current || e.currentTarget.dataset.current;
-			this.isLeft = this.switchTab(index);
+			this.tabIndex = e.target.dataset.current || e.currentTarget.dataset.current;
 		},
 		ontabchange(e) {
 			let index = e.target.current || e.detail.current;
 			this.switchTab(index);
 		},
 		switchTab(index) {
-			if (this.newsList[index].data.length === 0) {
-				this.getList(index);
+			if(this.newsList[index].data.length === 0) {
+				this.getVideoList(index)
 			}
-
-			if (this.tabIndex === index) {
-				return;
-			}
-
-			// 缓存 tabId
-			if (this.newsList[this.tabIndex].data.length > MAX_CACHE_DATA) {
-				let isExist = this.cacheTab.indexOf(this.tabIndex);
-				if (isExist < 0) {
-					this.cacheTab.push(this.tabIndex);
-					//console.log("cache index:: " + this.tabIndex);
-				}
-			}
-
 			this.tabIndex = index;
-			console.log(this.tabIndex);
-			console.log(this.lastIndex);
-
-			if (this.tabIndex < 5 && this.lastIndex < this.tabIndex) {
-				this.lastIndex = this.tabIndex;
-				return;
-			} else {
-				this.scrollInto = this.tabBars[index-5].id;
-			}
-			// this.scrollInto = this.tabBars[index].id;
-			this.lastIndex = this.tabIndex;
-			// 释放 tabId
-			if (this.cacheTab.length > MAX_CACHE_PAGE) {
-				let cacheIndex = this.cacheTab[0];
-				this.clearTabData(cacheIndex);
-				this.cacheTab.splice(0, 1);
-				//console.log("remove cache index:: " + cacheIndex);
-			}
+			this.scrollInto = this.tabBars[index].id
 		},
-		clearTabData(e) {
-			this.newsList[e].data.length = 0;
-			this.newsList[e].loadingText = '加载更多...';
-		},
-		refreshData() {},
 		onrefresh(e) {
 			var tab = this.newsList[this.tabIndex];
 			if (!tab.refreshFlag) {
@@ -383,18 +341,8 @@ export default {
 			}
 			tab.refreshing = true;
 			tab.refreshText = '正在刷新...';
-
-			setTimeout(() => {
-				this.refreshData();
-				this.pulling = true;
-				tab.refreshing = false;
-				tab.refreshFlag = false;
-				tab.refreshText = '已刷新';
-				setTimeout(() => {
-					// TODO fix ios和Android 动画时间相反问题
-					this.pulling = false;
-				}, 500);
-			}, 2000);
+			this.page = 1;
+			this.getVideoList(this.tabIndex);
 		},
 		onpullingdown(e) {
 			var tab = this.newsList[this.tabIndex];
@@ -409,17 +357,11 @@ export default {
 				tab.refreshText = '下拉可以刷新';
 			}
 		},
-		newGuid() {
-			let s4 = function() {
-				return ((65536 * (1 + Math.random())) | 0).toString(16).substring(1);
-			};
-			return (s4() + s4() + '-' + s4() + '-4' + s4().substr(0, 3) + '-' + s4() + '-' + s4() + s4() + s4()).toUpperCase();
-		}
 	}
 };
 </script>
 
-<style>
+<style scoped>
 /* 头条小程序组件内不能引入字体 */
 /* #ifdef MP-TOUTIAO */
 @font-face {
@@ -430,57 +372,6 @@ export default {
 }
 /* #endif */
 
-/* 顶部标题栏 */
-.page-header {
-	background-color: #ec706b;
-}
-.page-header-wrapper {
-	flex-direction: row;
-	justify-content: center;
-	align-items: center;
-	height: var(--status-bar-height);
-	padding: 20upx 10upx 15upx 10upx;
-	/* background-color: #ec706b; */
-	/* margin-top: 30px; */
-}
-
-.page-header-left {
-	opacity: 0.9;
-	float: left;
-	padding-top: 20px;
-}
-
-.page-header-center {
-	flex: 1;
-	padding: 0px 30px 0 20px;
-	text-align: center;
-}
-
-.search-input {
-	height: 40px;
-	font-size: 14px;
-	color: #999999;
-	text-align: center;
-	line-height: 70upx;
-	border-radius: 100px;
-	background-color: #fff;
-	padding-top: 10upx;
-	padding-bottom: 10upx;
-	margin-top: 60upx;
-}
-
-.page-header-right {
-	width: 63upx;
-	align-items: center;
-	float: right;
-	padding-top: 60upx;
-}
-
-.contribute-text {
-	font-size: 32upx;
-	color: #fff;
-}
-
 /* #ifndef APP-PLUS */
 page {
 	width: 100%;
@@ -489,7 +380,6 @@ page {
 }
 
 /* #endif */
-
 .tabs {
 	flex: 1;
 	flex-direction: column;
@@ -500,6 +390,42 @@ page {
 	/* #endif */
 }
 
+/* 顶部标题栏 */
+.page-header {
+	background-color: #ec706b;
+}
+.page-header-wrapper {
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	padding: 20upx 10upx 15upx 10upx;
+}
+.page-header-left {
+	opacity: 0.9;
+}
+.page-header-center {
+	flex: 1;
+	height: 80rpx;
+	margin: 0px 60rpx 0 40rpx;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	border-radius: 100px;
+	background-color: #fff;
+}
+.search-input {
+	font-size: 14px;
+	color: #999999;
+}
+.page-header-right {
+	align-items: center;
+}
+
+.contribute-text {
+	font-size: 28upx;
+	color: #fff;
+}
+
 .scroll-h {
 	width: 750rpx;
 	height: 80rpx;
@@ -507,10 +433,6 @@ page {
 	/* #ifndef APP-PLUS */
 	white-space: nowrap;
 	/* #endif */
-	/* flex-wrap: nowrap; */
-	/* border-color: #cccccc;
-		border-bottom-style: solid;
-		border-bottom-width: 1px; */
 }
 
 .line-h {
@@ -543,17 +465,16 @@ page {
 }
 
 .underlinebox {
-	height: 3px;
+	height: 4rpx;
 	display: flex;
 	align-content: center;
 	justify-content: center;
 	transition: 0.5s;
-	height: 4px;
-	background-color: #ec706b;
-	margin-top: -10px;
+	transform: translateY(-100%);
+	background-color: transparent;
 }
 .underlinebox-active {
-	background-color: none;
+	background-color: #ec706b;
 }
 .swiper-box {
 	flex: 1;
@@ -562,6 +483,7 @@ page {
 .swiper-item {
 	flex: 1;
 	flex-direction: row;
+	background-color: #f2f2f2;
 }
 
 .scroll-v {
@@ -572,23 +494,6 @@ page {
 	width: 750rpx;
 }
 
-.update-tips {
-	position: absolute;
-	left: 0;
-	top: 41px;
-	right: 0;
-	padding-top: 5px;
-	padding-bottom: 5px;
-	background-color: #fddd9b;
-	align-items: center;
-	justify-content: center;
-	text-align: center;
-}
-
-.update-tips-text {
-	font-size: 14px;
-	color: #ffffff;
-}
 
 .refresh {
 	width: 750rpx;
@@ -640,5 +545,74 @@ page {
 .loading-more-text {
 	font-size: 28rpx;
 	color: #999;
+}
+
+.main-wrap{
+	display: flex;
+	flex-direction: row;
+	padding: 16rpx 8rpx;
+}
+.left-wrap,
+.right-wrap {
+	width: 50%;
+	display: flex;
+	align-items: center;
+}
+.list-box{
+  background-color: #fff;
+  border-radius: 8rpx;
+  width: 350rpx;
+  margin-bottom: 24rpx;
+  overflow: hidden;
+}
+.list-video-wrap{
+	/* #ifdef APP-NVUE */
+	flex: 1;
+	/* #endif */
+	/* #ifndef APP-NVUE */
+	width: 100%;
+	/* #endif */
+}
+.video-cover {
+	flex: 1;
+	height: 420rpx;
+}
+.note-view{
+  padding: 30rpx;
+}
+.note-title {
+	font-size: 28rpx;
+}
+.popup-wrapper {
+	width: 560rpx;
+	border-radius: 16rpx;
+	background-color: #FFFFFF;
+}
+.popup-title {
+	padding-top: 50rpx;
+}
+.popup-title-text{
+	text-align: center;
+	color: #333;
+	font-size: 32rpx;
+	font-weight: bold;
+}
+.popup-content {
+	padding: 36rpx 50rpx 50rpx;
+}
+.popup-content-text {
+	text-align: center;
+	font-size: 28rpx;
+}
+.popup-action {
+	border-top-width: 1rpx;
+	border-top-style: solid;
+	border-top-color: #eee;
+	height: 96rpx;
+	/* #ifndef APP-NVUE */
+	display: flex;
+	/* #endif */
+	align-items: center;
+	justify-content: center;
 }
 </style>

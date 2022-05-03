@@ -1,8 +1,6 @@
 <template>
 	<view> 
 		<!-- <z-nav-bar backState="2000" title="我的页面"></z-nav-bar> -->
-		<!-- 公共组件-每个页面必须引入 -->
-		<public-module></public-module>
 		<view class="nav_list" @click="onPageJump('/pages/user/login')">
 			<image src="../../static/demo/icon_case.png" mode="aspectFit"></image>
 			<text>登录</text>
@@ -13,7 +11,7 @@
 		</view>
 		<view class="nav_list" @click="onPageJump('/pages/user/forget')">
 			<image src="../../static/demo/icon_case.png" mode="aspectFit"></image>
-			<text>忘记密码</text>
+			<text>修改登录密码</text>
 		</view>
 		<view class="nav_list" @click="onPageJump('/pages/user/bindPhone')">
 			<image src="../../static/demo/icon_case.png" mode="aspectFit"></image>
@@ -27,6 +25,10 @@
 			<image src="../../static/demo/icon_case.png" mode="aspectFit"></image>
 			<text>个人信息</text>
 		</view>
+		<view class="nav_list" @click="loginOut">
+			<image src="../../static/demo/icon_case.png" mode="aspectFit"></image>
+			<text>退出登录</text>
+		</view>
 		<!-- <view class="nav_list" @click="onPageJump('/pages/template/poster/goodsPoster')">
 			<image src="../../static/demo/icon_case.png" mode="aspectFit"></image>
 			<text>商品海报生成</text>
@@ -35,14 +37,19 @@
 			<image src="../../static/demo/icon_case.png" mode="aspectFit"></image>
 			<text>推广海报生成</text>
 		</view> -->
-		<z-navigation></z-navigation>
+		<!-- <z-navigation></z-navigation> -->
 	</view>
 </template>
 
 <script>
+	import http from '@/config/requestConfig.js'
+	import { mapState, mapMutations } from 'vuex';
 export default {
 	data() {
 		return {};
+	},
+	computed: {
+		...mapState(["userInfo"])
 	},
 	//第一次加载
 	onLoad(e) {
@@ -56,6 +63,7 @@ export default {
 	},
 	//方法
 	methods: {
+		...mapMutations(['emptyUserInfo']),
 		onPageJump(url) {
 			uni.navigateTo({
 				url: url
@@ -67,6 +75,25 @@ export default {
 					url: url
 				});
 			// });
+		},
+		loginOut() {
+			console.log(this.userInfo)
+			if(!this.userInfo.token){
+				uni.showToast({
+					title: '您已是游客状态',
+					icon: 'none'
+				});
+				return;
+			};
+			http.post('/sys/logout?token=' + this.userInfo.token).then((res) => {
+				if(res.response.data.code === 0) {
+					uni.showToast({
+						title: '退出成功！',
+						icon: 'none'
+					});
+					this.emptyUserInfo();
+				}
+			})
 		}
 	},
 	//页面隐藏

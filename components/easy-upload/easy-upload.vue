@@ -14,15 +14,9 @@
 					<view v-if="!uploadIcon" class="uploader-input" @tap="chooseUploads"></view>
 					<image v-else class="image-cion" :src="uploadIcon" @tap="chooseUploads"></image>
 				</view>
-			<!-- <button type="primary" @tap="unifiedUpload">上传</button>
-			<button type="primary" @click="unifiedUpload">上传</button> -->
 			
 		</view>	
-		<view class="upload" type="primary" @click="unifiedUpload">上传</view>
-		
-		<!-- <view>
-			<button @click="unifiedUpload">上传</button>
-		</view> -->
+		<button class="add-btn" type="primary" @tap="unifiedUpload">上传</button>
 	</view>
 </template>
 
@@ -62,11 +56,17 @@
 			//上传图片大小 默认3M
 			upload_max: {
 				type: Number,
-				default: 3
+				default: 10
 			},
 			autoUpload: {
 				type: Boolean,
 				default: false
+			},
+			formData: {
+				type: Object,
+				default: () => {
+					return {}
+				}
 			}
 		},
 		data(){
@@ -82,8 +82,6 @@
 		watch:{
 			dataList:{
 				handler(val){
-					console.log("123")
-					console.log(val)
 					this.uploads = val;
 				},
 				immediate: true
@@ -121,11 +119,6 @@
 										});
 									}
 								}
-							},
-							fail: (err) => {
-								uni.showModal({
-									content: JSON.stringify(err)
-								});
 							}
 						});
 					break;
@@ -133,34 +126,8 @@
 						uni.chooseVideo({
 							sourceType: ['camera', 'album'],
 							success: (res) => {
-								console.log("aaaaaaaaaaaaaaaaaa")
 								console.log(res)
-								if(Math.ceil(res.size / 1024) < this.upload_max * 1024){
-									this.uploads.push(res.tempFilePath)
-									uni.uploadFile({
-										url: this.uploadUrl, //仅为示例，非真实的接口地址
-										filePath: res.tempFilePath,
-										name: 'multipartFile',
-										//请求参数
-										formData: {
-											'user': 'test'
-										},
-										success: (uploadFileRes) => {
-											console.log(uploadFileRes)
-											this.$emit('successVideo',uploadFileRes)
-										}
-									});
-								}else {
-									uni.showModal({
-										title: '提示',
-										content: `第${[...new Set(this.exceeded_list)].join(',')}张视频超出限制${this.upload_max}MB,已过滤`
-									});
-								}
-							},
-							fail: (err) => {
-								uni.showModal({
-									content: JSON.stringify(err)
-								});
+								this.uploads.push(res.tempFilePath)
 							}
 						});
 					break;
@@ -195,30 +162,49 @@
 				});
 			},
 			uploadFile(path){
+				uni.showLoading({
+					title: '上传中...',
+					mask: true
+				});
+				let url = `${this.uploadUrl}/${this.formData.tag}/${this.formData.videoDesc}/?token=${this.$store.state.userInfo.token}`
 				uni.uploadFile({
-					url: "http://localhost:8083/video/add", //仅为示例，非真实的接口地址
+					url, //仅为示例，非真实的接口地址
 					filePath: path,
-					name: 'file',
-					//自定义请求参数
-					formData: {
-						'multipartFile': 'test'
-					},
+					name: 'multipartFile',
 					success: (uploadFileRes) => {
-						this.$emit('successImage',uploadFileRes)
+						uni.hideLoading()
+						this.$emit('successVideo',uploadFileRes)
+					},
+					fail:(err) => {
+						uni.hideLoading()
+						uni.showToast({
+							title: JSON.stringify(err),
+							icon: 'none'
+						});
 					}
 				});
 			},
 			unifiedUpload(){
-				console.log("1111111111")
-				console.log(this.uploads)
 				if(!this.uploadUrl) {
 					uni.showModal({
 						content: '请填写上传接口'
 					});
 					return;
 				};
-				var uploadPath = [];
-				uploadPath.push("http://localhost:8083/video/add")
+				if(!this.formData.videoDesc) {
+					uni.showToast({
+						title: '请描述一下视频吧',
+						icon: 'none'
+					});
+					return;
+				}
+				if(this.uploads.length == 0) {
+					uni.showToast({
+						title: '请选择上传视频',
+						icon: 'none'
+					});
+					return;
+				};
 				for (let i of this.uploads) {
 					this.uploadFile(i)	
 				}
@@ -229,7 +215,9 @@
 
 <style scoped>
 	.upload {
+		/* #ifndef APP-NVUE */
 		display: flex;
+		/* #endif */
 		flex-direction: row;
 		flex-wrap: wrap;
 	}
@@ -240,7 +228,9 @@
 		position: relative;
 	}
 	.uploade-img {
+		/* #ifndef APP-NVUE */
 		display: block;
+		/* #endif */
 		width: 210upx;
 		height: 210upx;
 	}
@@ -266,11 +256,12 @@
 	}
 	.uploader-input-box:before,
 	.uploader-input-box:after {
+		/* #ifndef APP-NVUE */
 		content: " ";
+		/* #endif */
 		position: absolute;
 		top: 50%;
 		left: 50%;
-		-webkit-transform: translate(-50%, -50%);
 		transform: translate(-50%, -50%);
 		background-color: #D9D9D9;
 	}
@@ -304,8 +295,12 @@
 		width: 208upx;
 		height: 208upx;
 	}
-	.uploader-icon .image-cion{
+	.image-cion{
 		width: 100%;
 		height: 100%;
+	}
+	.add-btn {
+		margin: 0 10rpx;
+		background-color: #ec706b;
 	}
 </style>

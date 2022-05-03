@@ -1,6 +1,7 @@
+let userInfo = uni.getStorageSync('userInfo') || {};
 export const state = {
   //用户数据
-  userInfo: {},
+  userInfo,
 };
 export const mutations = {
   //储存用户信息
@@ -8,7 +9,8 @@ export const mutations = {
   	if (data) {
   		state.userInfo =  Object.assign({}, state.userInfo,data);
   		// #ifdef H5
-  		window.sessionStorage.setItem('userInfo', JSON.stringify(state.userInfo));
+  		// window.sessionStorage.setItem('userInfo', JSON.stringify(state.userInfo));
+		uni.setStorageSync('userInfo', state.userInfo);
   		// #endif
   		// #ifndef H5
   		uni.setStorageSync('userInfo', state.userInfo);
@@ -19,7 +21,8 @@ export const mutations = {
   emptyUserInfo(state) {
   	state.userInfo = {};
   	// #ifdef H5
-  	window.sessionStorage.removeItem("userInfo");
+  	// window.sessionStorage.removeItem("userInfo");
+	uni.removeStorageSync("userInfo");
   	// #endif
   	// #ifndef H5
   	uni.removeStorageSync("userInfo");

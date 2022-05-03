@@ -30,6 +30,7 @@
 		mapMutations
 	} from 'vuex';
 	import http from '@/config/requestConfig'
+	import base from '@/config/baseUrl.js'
 	export default {
 		data() {
 			return {
@@ -39,6 +40,7 @@
 				avatar: '',
 				nickname: '',
 				phone: "",
+				users: {},
 				http: http
 			};
 		},
@@ -47,9 +49,13 @@
 		},
 		//第一次加载
 		onLoad(e) {
-			this.avatar = this.userInfo.avatar || "";
-			this.nickname = this.userInfo.nickname || "";
-			this.phone = this.userInfo.phone || "";
+			http.get('/sys/user/info?token=' + this.userInfo.token).then(res => {
+				console.log(res.response.data)
+				this.users = res.response.data.user;
+				this.avatar = this.users.avatar;
+				this.nickname = this.users.name;
+				this.phone = this.users.mobile
+			})
 		},
 		//页面显示
 		onShow() {},
@@ -63,7 +69,7 @@
 			},
 			//修改手机号
 			onPhoneChange(e) {
-				if (!this.$base.phoneRegular.test(e.value)) {
+				if (!base.phoneRegular.test(e.value)) {
 					uni.showToast({
 						title: '请输入正确的手机号',
 						icon: 'none'
@@ -75,7 +81,7 @@
 			},
 			//修改头像
 			onUnloadImg() {
-				this.http.urlImgUpload("api/common/v1/upload_image", {
+				this.http.urlImgUpload("/api/common/v1/upload_image", {
 					count: 1
 				}).then(res => {
 					this.avatar = res[0].url;
@@ -83,13 +89,13 @@
 			},
 			//提交
 			onSubmit() {
-				if (this.avatar == '') {
-					uni.showToast({
-						title: '请上传头像',
-						icon: 'none'
-					});
-					return;
-				}
+				// if (this.avatar == '') {
+				// 	uni.showToast({
+				// 		title: '请上传头像',
+				// 		icon: 'none'
+				// 	});
+				// 	return;
+				// }
 				if (this.nickname == '') {
 					uni.showToast({
 						title: '请输入昵称',
@@ -98,11 +104,12 @@
 					return;
 				}
 				let httpData = {
-					nickname: this.nickname,
+					appUserId: this.users.userId,
+					username: this.nickname,
 					avatar: this.avatar
 				};
 				if(this.phone){
-					if (!this.$base.phoneRegular.test(this.phone)) {
+					if (!base.phoneRegular.test(this.phone)) {
 						uni.showToast({
 							title: '请输入正确的手机号',
 							icon: 'none'
@@ -114,7 +121,7 @@
 					}
 				}
 				this.$http
-					.post('api/common/v1/edit_user_info', httpData)
+					.post('/app/my/update?token=' + this.userInfo.token, httpData)
 					.then(res => {
 						this.setUserInfo({
 							nickname: this.nickname,

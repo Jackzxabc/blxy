@@ -1,15 +1,36 @@
 <template>
     <view class="burst-wrap">
-		
-		
+		<view class="textarea-wrap">
+			<textarea class="textarea" v-model="videoDesc" placeholder="请输入视频描述" />
+		</view>
+		<view class="list">
+			<picker 
+				class="list-picker" 
+				:value="tagsActive" 
+				:range="tags"
+				range-key="name"
+				@change="pickerChange"
+			>
+				<view class="picker-view">
+					<view class="title">
+						选择标签
+					</view>
+					<view class="picker">
+						<text>{{tags[tagsActive].name}}</text>
+						<image class="icon" src="/static/icon/icon_xiajiantou.png"></image>
+					</view>
+				</view>
+			</picker>
+		</view>
 		<easy-upload
-		        :dataList="dataList" 
-		        uploadUrl="http://localhost:8083/video/add?token=af8d03ade82507e682f6ce99c9e72c5f" 
-		        deleteUrl='http://localhost:8083/video/add?token=580760315dc9abde59596d95a3d0f2c2' 
-		        :types="types"
-		        @successImage="successImage" 
-		        @successVideo="successvideo"
-		    />
+			:dataList="dataList" 
+			:uploadUrl="uploadUrl" 
+			:deleteUrl='uploadUrl' 
+			:types="types"
+			:formData="formData"
+			@successImage="successImage" 
+			@successVideo="successvideo"
+		/>
 			
 			
         <view class="burst-wrap-bg">
@@ -52,6 +73,7 @@
             ['camera', 'album']
         ]
 	import easyUpload from '@/components/easy-upload/easy-upload.vue'
+	import baseUrl from '@/config/baseUrl.js'
     export default {
 		components:{
 		            easyUpload
@@ -65,7 +87,42 @@
 			},
         data() {
             return {
-				
+				tags: [
+					{
+						name: '推荐',
+						id: 'tuijian'
+					},
+					{
+						name: '学生',
+						id: 'xuesheng'
+					},
+					{
+						name: '自由职业',
+						id: 'ziyouzhiye'
+					},
+					{
+						name: '创业',
+						id: 'chuangye'
+					},
+					{
+						name: '技术',
+						id: 'jishu'
+					},
+					{
+						name: '设计',
+						id: 'sheji'
+					},
+					{
+						name: '运营',
+						id: 'yunying'
+					},
+					{
+						name: '产品',
+						id: 'chanpin'
+					},
+				],
+				tagsActive: 0,
+				videoDesc: '',
 				dataList: [],
 				types: 'video',
 				// types: 'image',
@@ -91,23 +148,44 @@
 				videoUrlInfo: {},
             }
         },
+		computed: {
+			uploadUrl() {
+				return baseUrl.baseUrl + '/video/add'
+			},
+			formData() {
+				return {
+					tag: this.tags[this.tagsActive].name,
+					videoDesc: this.videoDesc
+				}
+			}
+		},
         onUnload() {
             this.src = '',
             this.sourceTypeIndex = 2,
             this.sourceType = ['拍摄', '相册', '拍摄或相册'];
         },
 		onLoad() {
-			console.log("11111111111111")
 		},
         methods: {
+			pickerChange(e) {
+				this.tagsActive = e.detail.value
+			},
 			successImage(){
 				console.log("图片上传成功！！！")
 			},
 			successvideo(res){
-				console.log("视频上传成功！！！")
+				uni.showToast({
+					title: '视频上传成功',
+					icon: 'success'
+				});
 				console.log(res)
 				this.videoUrlInfo = res.data;
-				console.log(this.videoUrlInfo)
+				this.dataList = [];
+				this.videoDesc = '';
+				uni.$emit('subscribe/video', {tag: this.tags[this.tagsActive]})
+				uni.switchTab({
+					url: '/pages/index/index'
+				})
 			},
             chooseVideoImage(){
                 uni.showActionSheet({
@@ -229,14 +307,14 @@
     width: 100%;
     height: 100%;
 }
-/* .burst-wrap .burst-wrap-bg{
+.burst-wrap .burst-wrap-bg{
     position: relative;
-    width: 100%;
+    /* width: 100%;
     height: 320upx;
     background:linear-gradient(90deg,rgba(251,91,80,1) 0%,rgba(240,45,51,1) 100%);
     border-bottom-right-radius: 80upx;
-    border-bottom-left-radius: 80upx;
-} */
+    border-bottom-left-radius: 80upx; */
+}
 .burst-wrap .burst-wrap-bg>view{
     width: 90%;
     height: 100%;
@@ -245,6 +323,38 @@
     top: 65upx;
     left: 0;
     right: 0;
+}
+.textarea-wrap {
+	width: 100%;
+	padding: 10rpx;
+	height: 240rpx;
+	box-sizing: border-box;
+}
+.textarea-wrap .textarea{
+	width: 100%;
+	height: 100%;
+	font-size: 28rpx;
+}
+.list {
+	padding: 0 10rpx ;
+	font-size: 28rpx;
+}
+.list-picker .picker-view {
+	width: 100%;
+	height: 72rpx;
+	display: flex;
+	align-items: center;
+}
+.list-picker .picker-view .picker{
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex: 1;
+}
+.list-picker .picker-view .picker .icon{
+	width: 24rpx;
+	height: 16rpx;
+	margin-left: 16rpx;
 }
 
 .form-item{

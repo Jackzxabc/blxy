@@ -2,15 +2,14 @@
 	<view class="page">
 		<z-nav-bar></z-nav-bar>
 		<!-- 公共组件-每个页面必须引入 -->
-		<public-module></public-module>
-		<view class="title">忘记密码</view>
-		<view class="input_box"><input type="text" v-model="email" placeholder="请输入邮箱" /></view>
-		<view class="input_box">
+		<view class="title">修改登录密码</view>
+		<!-- <view class="input_box"><input type="text" v-model="email" placeholder="请输入邮箱" /></view> -->
+		<!-- <view class="input_box">
 			<input type="number" v-model="code" placeholder="请输入邮箱验证码" />
 			<button @click="getCode">{{codeText}}</button>
-		</view>
+		</view> -->
 		<view class="input_box"><input type="password" v-model="password" placeholder="请输入密码" /></view>
-		<view class="input_box"><input type="password" v-model="confirmPassword" placeholder="请确认密码" /></view>
+		<view class="input_box"><input type="password" v-model="newPassword" placeholder="请输入新密码" /></view>
 		<view class="btn_box"><button @click="onSubmit">提交</button></view>
 	</view>
 </template>
@@ -27,7 +26,7 @@ export default {
 			//验证码
 			code: '',
 			//确认密码
-			confirmPassword: '',
+			newPassword: '',
 			//验证码
 			codeText: '获取验证码',
 			//验证码已发
@@ -89,27 +88,27 @@ export default {
 			}, 1000);
 		},
 		onSubmit() {
-			if (!this.email) {
-				uni.showToast({
-					title: '请输入邮箱',
-					icon: 'none'
-				});
-				return;
-			}
-			if (!this.$base.mailRegular.test(this.email)) {
-				uni.showToast({
-					title: '请输入正确的邮箱',
-					icon: 'none'
-				});
-				return;
-			}
-			if (!this.code) {
-				uni.showToast({
-					title: '请输入验证码',
-					icon: 'none'
-				});
-				return;
-			}
+			// if (!this.email) {
+			// 	uni.showToast({
+			// 		title: '请输入邮箱',
+			// 		icon: 'none'
+			// 	});
+			// 	return;
+			// }
+			// if (!this.$base.mailRegular.test(this.email)) {
+			// 	uni.showToast({
+			// 		title: '请输入正确的邮箱',
+			// 		icon: 'none'
+			// 	});
+			// 	return;
+			// }
+			// if (!this.code) {
+			// 	uni.showToast({
+			// 		title: '请输入验证码',
+			// 		icon: 'none'
+			// 	});
+			// 	return;
+			// }
 			if (!this.password) {
 				uni.showToast({
 					title: '请输入密码',
@@ -117,35 +116,36 @@ export default {
 				});
 				return;
 			}
-			if (!this.confirmPassword) {
+			if (!this.newPassword) {
 				uni.showToast({
 					title: '请输入确认密码',
 					icon: 'none'
 				});
 				return;
 			}
-			if (this.confirmPassword != this.password) {
-				uni.showToast({
-					title: '两次密码不一致',
-					icon: 'none'
-				});
-				return;
-			}
+			const { token } = this.$store.state.userInfo;
 			this.$http
-				.post('api/common/v1/forget_password', {
-					email: this.email,
-					code:this.code,
-					password: md5(this.password),
+				.post('/sys/user/password?token=' + token, {
+					password: this.password,
+					newPassword: this.newPassword
+					// password: md5(this.password),
 				})
 				.then(res => {
-					uni.showModal({
-						title:"提示",
-						content:"密码修改成功！",
-						showCancel:false,
-						success: (res) => {
-							uni.navigateBack();
-						}
-					});
+					if(res.response.data.code == 0) {
+						uni.showModal({
+							title:"提示",
+							content:"密码修改成功！",
+							showCancel:false,
+							success: (res) => {
+								uni.navigateBack();
+							}
+						});
+					}else{
+						uni.showToast({
+							title: JSON.stringify(res.response.data.msg),
+							icon: 'none'
+						});
+					}
 				});
 		}
 	},

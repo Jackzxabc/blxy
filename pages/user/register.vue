@@ -1,16 +1,14 @@
 <template>
 	<view class="page">
 		<z-nav-bar></z-nav-bar>
-		<!-- 公共组件-每个页面必须引入 -->
-		<public-module></public-module>
 		<view class="title">注册</view>
-		<view class="input_box"><input type="text" v-model="email" placeholder="请输入邮箱" /></view>
-		<view class="input_box">
+		<view class="input_box"><input type="text" v-model="name" placeholder="请输入姓名" /></view>
+		<!-- <view class="input_box">
 			<input type="number" v-model="code" placeholder="请输入邮箱验证码" />
 			<button @click="getCode">{{codeText}}</button>
-		</view>
-		<view class="input_box"><input type="password" v-model="password" placeholder="请输入密码" /></view>
-		<view class="input_box"><input type="password" v-model="confirmPassword" placeholder="请确认密码"/></view>
+		</view> -->
+		<view class="input_box"><input type="password" v-model="username" placeholder="请输入用户名" /></view>
+		<view class="input_box"><input type="password" v-model="password" placeholder="请输入密码"/></view>
 		<!-- <view class="input_box"><input type="number" v-model="recommendCode" placeholder="推荐人邮箱码（非必填）" @confirm="onSubmit"/></view> -->
 		<view class="btn_box"><button @click="onSubmit">注册</button></view>
 		<view class="protocol">
@@ -25,14 +23,13 @@ var clear;
 export default {
 	data() {
 		return {
-			//邮箱
-			email: '',
+			name: '',
 			// 密码
 			password: '',
 			//验证码
 			code: '',
 			//确认密码
-			confirmPassword: '',
+			username: '',
 			// 推荐码
 			recommendCode:"",
 			//验证码
@@ -101,23 +98,16 @@ export default {
 			}, 1000);
 		},
 		onSubmit() {
-			if (!this.email) {
+			if (!this.name) {
 				uni.showToast({
-					title: '请输入邮箱',
+					title: '请输入姓名',
 					icon: 'none'
 				});
 				return;
 			}
-			if (!this.$base.mailRegular.test(this.email)) {
+			if (!this.username) {
 				uni.showToast({
-					title: '请输入正确的邮箱',
-					icon: 'none'
-				});
-				return;
-			}
-			if (!this.code) {
-				uni.showToast({
-					title: '请输入验证码',
+					title: '请输入用户名',
 					icon: 'none'
 				});
 				return;
@@ -129,30 +119,14 @@ export default {
 				});
 				return;
 			}
-			if (!this.confirmPassword) {
-				uni.showToast({
-					title: '请输入确认密码',
-					icon: 'none'
-				});
-				return;
-			}
-			if (this.confirmPassword != this.password) {
-				uni.showToast({
-					title: '两次密码不一致',
-					icon: 'none'
-				});
-				return;
-			}
 			let httpData =  {
-				email: this.email,
-				code:this.code,
-				password: md5(this.password),
+				name: this.name,
+				username:this.username,
+				password: this.password,
+				menuList: 'menuApp'
 			};
-			if(this.recommendCode){
-				httpData.recommendCode = this.recommendCode;
-			}
 			this.$http
-				.post('api/common/v1/register',httpData)
+				.post('/sys/user/save',httpData)
 				.then(res => {
 					uni.showModal({
 						title:"提示",
